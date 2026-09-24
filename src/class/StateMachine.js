@@ -1,4 +1,4 @@
-import { STATES, TRANSITION } from "./constant/states.js";
+import { STATES, TRANSITION } from "../constant/states.js";
 
 export default class StateMachine {
   #state = STATES.IDLE;

@@ -1,7 +1,9 @@
-import switchTheme from "./src/class/switchTheme.js";
+import App from "./src/class/App.js";
 
 export default function Main() {
-  const main = document.getElementById("app");
+  const consponent = document.getElementById("app");
+  const app = new App(consponent.id);
+  app.init();
 }
 
 Main();

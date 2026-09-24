@@ -1,0 +1,381 @@
+/* ---------- Reset + базовая типографика ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #f2f2f2;
+  --surface: #ffffff;
+  --text: #2c2c2c;
+  --text-muted: #9b9b9b;
+  --accent: #ffc107;
+  --accent-dark: #e6ac00;
+  --danger: #f80f0f;
+  --del_btn: #f80f0f;
+  --success: #37d7b3;
+  --line: #ececec;
+  --radius: 12px;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  justify-content: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.todo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100vh;
+  padding: 24px 20px;
+}
+
+/* ---------- Шапка ---------- */
+.todo__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.todo__header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Кнопка "+" — круглая, жёлтая, внизу по центру */
+.btn--add {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0; /* скрываем текстовый "+ Добавить" */
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.45);
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+  z-index: 10;
+}
+
+/* рисуем плюс псевдоэлементами — чётко и масштабируемо */
+.btn--add::before,
+.btn--add::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: #fff;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.btn--add::before {
+  width: 22px;
+  height: 3px;
+}
+
+.btn--add::after {
+  width: 3px;
+  height: 22px;
+}
+
+.btn--add:hover {
+  background: var(--accent-dark);
+}
+
+.btn--add:active {
+  transform: translateX(-50%) scale(0.94);
+}
+
+/* ---------- Слот, в который рендерятся состояния ---------- */
+#slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 96px; /* место под плавающую "+" */
+}
+
+/* ============================================================
+   ЭКРАН 1. EmptyState (IDLE) — картинка + подпись по центру
+   ============================================================ */
+
+.todo__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.todo__empty img {
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+.todo__empty p {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ============================================================
+   ЭКРАН 2. Создание / редактирование (CREATING / EDITING)
+   Верхняя панель со стрелкой "назад" и галочкой, снизу — инпут
+   ============================================================ */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  animation: modal-in 0.18s ease;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 24px 20px;
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Заголовок модалки — заменяем на верхнюю панель через flex */
+.modal__content h2 {
+  display: none; /* в макете нет текстового заголовка */
+}
+
+/* Верхняя панель: стрелка слева, галочка справа.
+   Достигается через order + absolute, но проще — обёртка.
+   Ниже — стиль для будущей обёртки .modal__topbar */
+.modal__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  margin-bottom: 24px;
+}
+
+.modal__back,
+.modal__confirm {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.modal__back {
+  color: var(--accent);
+}
+
+.modal__confirm {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.modal__back:hover,
+.modal__confirm:hover {
+  background: rgba(255, 193, 7, 0.12);
+}
+
+/* Инпут создания задачи */
+.modal__input,
+#task-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 12px 0;
+  background: transparent;
+  color: var(--text);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.modal__input::placeholder,
+#task-input::placeholder {
+  color: var(--text-muted);
+}
+
+.modal__input:focus,
+#task-input:focus {
+  border-bottom-color: var(--accent);
+}
+
+/* Кнопки внизу — если решишь вернуться к варианту с текстовыми кнопками */
+.modal__actions {
+  display: none; /* в макете их нет — управление через topbar */
+}
+
+/* ============================================================
+   ЭКРАН 3. Список задач (HAS_TASKS)
+   ============================================================ */
+
+.todo__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Чекбокс — круглый, кастомный */
+.task__checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #d0d0d0;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.task__checkbox:hover {
+  border-color: var(--accent);
+}
+
+.task__checkbox:checked {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+/* Галочка внутри чекбокса */
+.task__checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.task__text {
+  flex: 1;
+  font-size: 15px;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.task--done .task__text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.task__edit {
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.task__editor:hover {
+  background: var(--surface);
+}
+
+/* Кнопки редактирования и удаления */
+.task__delete {
+  background: var(--del_btn);
+  color: var(--surface);
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px;
+  border-radius: 100%;
+  line-height: 1;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.task__edit {
+  color: var(--accent);
+}
+
+.task__edit:hover,
+.task__delete:hover {
+  color: var(--del_btn);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.task__edit:active,
+.task__delete:active {
+  transform: scale(0.92);
+}
+
+/* ---------- Вспомогательное ---------- */
+.hidden {
+  display: none !important;
+}
