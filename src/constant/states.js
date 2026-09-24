@@ -1,0 +1,13 @@
+export const STATES = {
+  IDLE: "IDLE", // список пуст
+  HAS_TASKS: "HAS_TASKS", // есть задачи
+  CREATING: "CREATING", // открыта модалка создания
+  EDITING: "EDITING", // редактирование задачи
+};
+
+export const TRANSITION = {
+  [STATES.IDLE]: [STATES.CREATING, STATES.IDLE, STATES.HAS_TASKS],
+  [STATES.HAS_TASKS]: [STATES.CREATING, STATES.EDITING, STATES.IDLE],
+  [STATES.CREATING]: [STATES.IDLE, STATES.HAS_TASKS],
+  [STATES.EDITING]: [STATES.HAS_TASKS, STATES.IDLE],
+};
